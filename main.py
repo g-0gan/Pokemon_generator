@@ -2,43 +2,31 @@
 This code print random Pokémon, or Pokémon with flags
 """
 import argparse
-from random import choice
+import random
 
 from constants import POKEMONS
 
-parser = argparse.ArgumentParser(description='Choice pokemon')
-parser.add_argument('-f', '--flying', action='store_true', help='Pokemons that have wings or can fly')
-parser.add_argument('-a', '--arm', action='store_true', help='Pokemons that have arm/arms')
-parser.add_argument('-t', '--tailed', action='store_true', help='Pokemons that have tails')
-args = parser.parse_args()
+
+def create_parser():
+    parser = argparse.ArgumentParser(description="Filter Pokémon")
+    parser.add_argument('-a', '--arms', action='store_true', help='Show Pokémon with arms')
+    parser.add_argument('-t', '--tail', action='store_true', help='Show Pokémon with tail')
+    parser.add_argument('-f', '--fly', action='store_true', help='Show Pokémon that can fly')
+    return parser
 
 
-def show_pokemon():
-    """
-    This function processes flags and give Pokémon.
-    """
-    selected_pokemon = []
-
-    if args.flying:
-        selected_pokemon.append(set(POKEMONS['fly']))
-    if args.arm:
-        selected_pokemon.append(set(POKEMONS['have_hands']))
-    if args.tailed:
-        selected_pokemon.append(set(POKEMONS['tails']))
-    if not any([args.flying, args.arm, args.tailed]):
-        all_pokemon = set(POKEMONS['fly'] + POKEMONS['have_hands'] + POKEMONS['tails'])
-        selected_pokemon.append(all_pokemon)
-
-    if selected_pokemon:
-        common_pokemon = list(set.intersection(*selected_pokemon))
-        if common_pokemon:
-            print('Selected Pokemon:')
-            print(choice(common_pokemon))
-        else:
-            print('Dont found pokemon.')
+def print_pokemon(args, list_of_pokemons):
+    if not args.arms and not args.tail and not args.fly:
+        filtered_list = list_of_pokemons
     else:
-        print('Other error.')
+        filtered_list = [pokemon for pokemon in POKEMONS if
+                         (not args.arms or args.arms == pokemon['arms']) and
+                         (not args.tail or args.tail == pokemon['tail']) and
+                         (not args.fly or args.fly == pokemon['fly'])]
+    print(random.choice(filtered_list)['name'])
 
 
 if __name__ == '__main__':
-    show_pokemon()
+    parser = create_parser()
+    args = parser.parse_args()
+    print_pokemon(args, POKEMONS)
